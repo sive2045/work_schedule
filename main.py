@@ -9,7 +9,7 @@ class MyWindow(QMainWindow):
         super().__init__()
 
         self.setWindowTitle("Work Scheduler")
-        self.setGeometry(300, 300, 400, 400)
+        self.setGeometry(300, 300, 900, 900)
         self.setWindowIcon(QIcon("img/icon.png"))
         self.set_status_bar()
 
@@ -21,6 +21,25 @@ class MyWindow(QMainWindow):
         self.claer_button()
         self.quit_button()
         self.saving_data()
+        self.initUI()
+
+
+    def initUI(self):
+        okButton = QPushButton('OK', parent=self)
+        cancleButton = QPushButton('Cancel', parent=self)
+
+        hbox = QHBoxLayout()
+        hbox.addStretch(1)
+        hbox.addWidget(okButton)
+        hbox.addWidget(cancleButton)
+        hbox.addStretch(1)
+
+        vbox = QVBoxLayout()
+        vbox.addStretch(3)
+        vbox.addLayout(hbox)
+        vbox.addStretch(1)
+
+        #self.setLayout(vbox)
 
     def set_status_bar(self):
         self.statusbar = QStatusBar(self)
