@@ -7,39 +7,24 @@ from PyQt5.QtGui import *
 class MyWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
-
+        self.set_style()
         self.setWindowTitle("Work Scheduler")
         self.setGeometry(300, 300, 900, 900)
         self.setWindowIcon(QIcon("img/icon.png"))
         self.set_status_bar()
+        self.set_sttich_image()
 
         self.test_line()
 
         self.set_text_label()
-        self.set_sttich_image()
 
         self.claer_button()
         self.quit_button()
         self.saving_data()
-        self.initUI()
 
-
-    def initUI(self):
-        okButton = QPushButton('OK', parent=self)
-        cancleButton = QPushButton('Cancel', parent=self)
-
-        hbox = QHBoxLayout()
-        hbox.addStretch(1)
-        hbox.addWidget(okButton)
-        hbox.addWidget(cancleButton)
-        hbox.addStretch(1)
-
-        vbox = QVBoxLayout()
-        vbox.addStretch(3)
-        vbox.addLayout(hbox)
-        vbox.addStretch(1)
-
-        #self.setLayout(vbox)
+    def set_style(self):
+        with open("StyleSheet.txt", 'r') as f:
+            self.setStyleSheet(f.read())
 
     def set_status_bar(self):
         self.statusbar = QStatusBar(self)
