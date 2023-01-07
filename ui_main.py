@@ -117,7 +117,7 @@ class MyWindow(QMainWindow):
         self.main_ui.work_timer.display('00:00')       
 
         self.timer = QTimer()
-        self.timer.setInterval(1000) # interval 1 min (60*1000) ms
+        self.timer.setInterval(60*1000) # interval 1 min (60*1000) ms
         self.timer.timeout.connect(self.timeout)
 
         # Init buttons
@@ -148,11 +148,6 @@ class MyWindow(QMainWindow):
         # change sttich img
         self.set_sttich_image(work=False)
 
-        # update achievement rate
-        self.total_time = self.hour_time + self.min_time / 60
-        ach_rate = cal_achievement_rate(self.total_time, self.time_goal)
-        self.main_ui.ach_rate_label.setText(ach_rate)
-
         # alter massage
         QMessageBox.about(self, "WORK TIME", f"Work time : {str(self.hour_time).rjust(2,'0')}:{str(self.min_time).rjust(2,'0')}")
         self.min_time = 0
@@ -165,6 +160,12 @@ class MyWindow(QMainWindow):
             self.min_time = 0
             self.hour_time += 1
 
+        # update achievement rate
+        self.total_time += self.hour_time + self.min_time / 60
+        ach_rate = cal_achievement_rate(self.total_time, self.time_goal)
+        self.main_ui.ach_rate_label.setText(ach_rate)
+
+        # update time lcd
         sender = self.sender()
         if id(sender) == id(self.timer):
             self.main_ui.work_timer.display(f"{str(self.hour_time).rjust(2,'0')}:{str(self.min_time).rjust(2,'0')}")
