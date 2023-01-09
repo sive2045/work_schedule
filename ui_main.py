@@ -160,15 +160,14 @@ class MyWindow(QMainWindow):
             self.min_time = 0
             self.hour_time += 1
 
-        # update achievement rate
-        self.total_time += self.hour_time + self.min_time / 60
-        ach_rate = cal_achievement_rate(self.total_time, self.time_goal)
-        self.main_ui.ach_rate_label.setText(ach_rate)
-
-        # update time lcd
         sender = self.sender()
         if id(sender) == id(self.timer):
+            # update time lcd
             self.main_ui.work_timer.display(f"{str(self.hour_time).rjust(2,'0')}:{str(self.min_time).rjust(2,'0')}")
+            # update achievement rate
+            self.total_time += self.hour_time + self.min_time / 60
+            ach_rate = cal_achievement_rate(self.total_time, self.time_goal)
+            self.main_ui.ach_rate_label.setText(ach_rate)
 
 if __name__ == "__main__" :
     app = QApplication(sys.argv) 
