@@ -37,8 +37,8 @@ class MyWindow(QMainWindow):
         self.set_todo_list()
 
         self.main_ui.set_time_goal_btn.clicked.connect(self.set_time_goal)
-        self.total_time = 0
-        self.time_goal = 1
+        self.total_time = 0 # (min)
+        self.time_goal = 1  # (hour)
 
     def set_todo_list(self):
         # Enable Menubar
@@ -155,6 +155,7 @@ class MyWindow(QMainWindow):
         self.main_ui.work_timer.display(f"{str(self.hour_time).rjust(2,'0')}:{str(self.min_time).rjust(2,'0')}")
 
     def timeout(self):
+        self.total_time += 1 # (min)
         self.min_time += 1
         if self.min_time >= 60:
             self.min_time = 0
@@ -163,9 +164,7 @@ class MyWindow(QMainWindow):
         sender = self.sender()
         if id(sender) == id(self.timer):
             # update time lcd
-            self.main_ui.work_timer.display(f"{str(self.hour_time).rjust(2,'0')}:{str(self.min_time).rjust(2,'0')}")
-            # update achievement rate
-            self.total_time += self.hour_time + self.min_time / 60
+            self.main_ui.work_timer.display(f"{str(self.hour_time).rjust(2,'0')}:{str(self.min_time).rjust(2,'0')}")            
             ach_rate = cal_achievement_rate(self.total_time, self.time_goal)
             self.main_ui.ach_rate_label.setText(ach_rate)
 
