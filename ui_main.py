@@ -59,13 +59,18 @@ class MyWindow(QMainWindow):
         return super(MyWindow, self).eventFilter(source, event)
 
     def edit_todo_item(self, pos):
-        if(self.main_ui.todo_list.itemAt(pos) is None):
-            pass
+        """
+        빈공간 클릭시 todo 추가
+        기존 todo 클릭시 수정
+        """
+        todo_item = self.main_ui.todo_list.itemAt(pos)
+
+        if(todo_item is None):
+            self.add_item()
         else:
-            text, ok = QInputDialog.getText(self, 'ToDo', 'Edit ToDo')
+            text, ok = QInputDialog.getText(self, 'ToDo', f'Edit ToDo: {todo_item.text()}')
             if ok:
-                edit_item = self.main_ui.todo_list.itemAt(pos)
-                edit_item.setText(text)
+                todo_item.setText(text)
 
     def generate_menu(self, pos):
         if(self.main_ui.todo_list.itemAt(pos) is None):
