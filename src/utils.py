@@ -9,7 +9,7 @@ def what_day_is_today():
 
 def cal_achievement_rate(total_time, goal_time):
     total_time_to_hour = total_time / 60
-    ach_time = str(round(total_time_to_hour/goal_time, 2) * 100).rjust(2, '0') + ' %'
+    ach_time = '{:.2f}'.format(total_time_to_hour * 100 /goal_time) + ' %'
     return ach_time
 
 if __name__ == "__main__":
