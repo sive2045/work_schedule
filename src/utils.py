@@ -34,14 +34,14 @@ def sub_time(start_time, end_time) -> float:
     return '{:.2f}'.format(time_duration)
 
 
-def db_insert_work_start_time(memo, goal_time ,work_date, work_star_time) -> int:
+def db_insert_work_start_time(goal_time, work_star_time) -> int:
     connect_db = sqlite3.connect("db/test.db")
     
     cur = connect_db.cursor()
 
     cur.executemany(
-        "INSERT INTO work_time_data(Memo, GoalTime, WorkDate, StartTime) VALUES (?, ?, ?, ?)",
-        [(memo, goal_time, work_date, work_star_time)]
+        "INSERT INTO work_time_data(GoalTime, StartTime) VALUES (?, ?)",
+        [(goal_time, work_star_time)]
     )
 
     cur.execute('SELECT id from work_time_data ORDER BY ROWID DESC LIMIT 1') # 가장 나중에 추가한 row data의 id 추출
@@ -52,8 +52,28 @@ def db_insert_work_start_time(memo, goal_time ,work_date, work_star_time) -> int
 
     return id
 
-def db_insert_work_end_time() -> None:
-    pass
+def db_insert_work_end_time(id, memo, work_end_time, duration_time) -> None:
+    connect_db = sqlite3.connect("db/test.db")
+    
+    cur = connect_db.cursor()
+
+    cur.execute(
+        "update work_time_data set EndTime = :end_time WHERE id = :id",
+        {"end_time": work_end_time, "id": id}
+    )
+
+    cur.execute(
+        "update work_time_data set Memo = :memo WHERE id = :id",
+        {"memo": memo, "id": id}
+    )
+
+    cur.execute(
+        "update work_time_data set DurationWokrTime = :duration_time WHERE id = :id",
+        {"duration_time": duration_time, "id": id}
+    )
+
+    connect_db.commit()
+    connect_db.close()
 
 if __name__ == "__main__":
     day = what_day_is_today()

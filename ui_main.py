@@ -4,6 +4,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from src.ui_loader import *
 from src.utils import *
+import datetime as dt
 
 # connect UI
 ui_auto_complete("src/main.ui", "src/main_ui.py")
@@ -31,6 +32,7 @@ class MyWindow(QMainWindow):
         self.set_today_label()
 
         self.set_timer()
+        self.main_ui.work_memo.setReadOnly(True)
         self.main_ui.work_start.clicked.connect(self.work_start_btn)
         self.main_ui.work_end.clicked.connect(self.work_end_btn)
 
@@ -38,7 +40,7 @@ class MyWindow(QMainWindow):
 
         self.main_ui.set_time_goal_btn.clicked.connect(self.set_time_goal)
         self.total_time = 0 # (min)
-        self.time_goal = 1  # (hour)
+        self.time_goal = 5  # (hour)
 
     def set_todo_list(self):
         # Enable Menubar
@@ -136,6 +138,12 @@ class MyWindow(QMainWindow):
 
         # Change sttich img
         self.set_sttich_image(work=True)
+
+        # save work start time data -> database
+        self.main_ui.work_memo.setReadOnly(False)
+        self.work_start_time_date = dt.datetime.now()
+        _work_start_time_date = f"{self.work_start_time_date.date()}:{self.work_start_time_date.time()}".split('.')[0]
+        self.db_id = db_insert_work_start_time(self.time_goal, _work_start_time_date)
         
         # Turn on Timer
         self.min_time = 0
@@ -152,6 +160,15 @@ class MyWindow(QMainWindow):
 
         # change sttich img
         self.set_sttich_image(work=False)
+
+        # save work end time date -> database
+        self.work_end_time_data = dt.datetime.now()
+        _work_end_time_date = f"{self.work_end_time_data.date()}:{self.work_end_time_data.time()}".split('.')[0]
+        _memo = self.main_ui.work_memo.toPlainText()
+        _delta_time = str(self.work_end_time_data - self.work_start_time_date).split('.')[0]
+        db_insert_work_end_time(self.db_id, _memo, _work_end_time_date, _delta_time)
+        self.main_ui.work_memo.clear()
+        self.main_ui.work_memo.setReadOnly(True)
 
         # alter massage
         QMessageBox.about(self, "WORK TIME", f"Work time : {str(self.hour_time).rjust(2,'0')}:{str(self.min_time).rjust(2,'0')}")

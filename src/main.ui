@@ -109,7 +109,7 @@ font: 'D2Coding';
      <bool>false</bool>
     </property>
    </widget>
-   <widget class="QTextEdit" name="work_content">
+   <widget class="QTextEdit" name="work_memo">
     <property name="geometry">
      <rect>
       <x>30</x>

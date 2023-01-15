@@ -89,14 +89,14 @@ class Ui_MainWindow(object):
         self.work_timer.setFont(font)
         self.work_timer.setAutoFillBackground(False)
         self.work_timer.setObjectName("work_timer")
-        self.work_content = QtWidgets.QTextEdit(self.centralwidget)
-        self.work_content.setGeometry(QtCore.QRect(30, 430, 561, 131))
+        self.work_memo = QtWidgets.QTextEdit(self.centralwidget)
+        self.work_memo.setGeometry(QtCore.QRect(30, 430, 561, 131))
         font = QtGui.QFont()
         font.setFamily("D2Coding")
-        self.work_content.setFont(font)
-        self.work_content.setAutoFillBackground(True)
-        self.work_content.setStyleSheet("border:1px solid rgb(63, 63, 70);")
-        self.work_content.setObjectName("work_content")
+        self.work_memo.setFont(font)
+        self.work_memo.setAutoFillBackground(True)
+        self.work_memo.setStyleSheet("border:1px solid rgb(63, 63, 70);")
+        self.work_memo.setObjectName("work_memo")
         self.work_start = QtWidgets.QPushButton(self.centralwidget)
         self.work_start.setGeometry(QtCore.QRect(640, 440, 101, 111))
         font = QtGui.QFont()
@@ -200,7 +200,7 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.work_content.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+        self.work_memo.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'D2Coding\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
