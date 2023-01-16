@@ -119,13 +119,17 @@ class MyWindow(QMainWindow):
 
     def add_item(self):
         text, ok = QInputDialog.getText(self, 'ToDo', 'Add ToDo')
-        if ok:
-            _todo_item = QListWidgetItem(text)
-            _todo_item.setCheckState(Qt.Unchecked)
-            self.main_ui.todo_list.addItem(_todo_item)
-            self.todo_date = dt.datetime.now()
-            _todo_db_id = db_insert_todo(text, self.todo_date.date())
-            self.todo_data.append({'id': _todo_db_id, 'todo': text})
+        if ok : 
+            if db_find_todo_id(self.todo_data, text) is None:
+                _todo_item = QListWidgetItem(text)
+                _todo_item.setCheckState(Qt.Unchecked)
+                self.main_ui.todo_list.addItem(_todo_item)
+                self.todo_date = dt.datetime.now()
+                _todo_db_id = db_insert_todo(text, self.todo_date.date())
+                self.todo_data.append({'id': _todo_db_id, 'todo': text})
+            else:
+                 QMessageBox.warning(self,'Work Scheduler','Warning: Duplicate Data!')
+                 self.add_item()
 
     def delete_item(self, pos):
         del_item_row = self.main_ui.todo_list.indexAt(pos).row()
@@ -142,10 +146,12 @@ class MyWindow(QMainWindow):
         '''
         for i in range(self.main_ui.todo_list.count()):
             item = self.main_ui.todo_list.item(i)            
+            todo = item.text()
+            todo_id = db_find_todo_id(self.todo_data, todo)
             if item.checkState() == Qt.Checked:
-                todo = item.text()
-                todo_id = db_find_todo_id(self.todo_data, todo)
-                db_is_done_todo(todo_id, 'TRUE')        
+                db_is_done_todo(todo_id, 'TRUE')
+            else:
+                db_is_done_todo(todo_id, 'FALSE')
 
     def set_time_goal(self):
         _time, ok = QInputDialog.getInt(self, 'Time Goal', 'Set Time Goal(h)')
