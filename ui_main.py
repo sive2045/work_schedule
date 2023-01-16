@@ -4,6 +4,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from src.ui_loader import *
 from src.utils import *
+import pandas as pd
 import datetime as dt
 
 # connect UI
@@ -43,12 +44,41 @@ class MyWindow(QMainWindow):
         self.time_goal = 5  # (hour)
 
     def set_todo_list(self):
+        # Load task from database
+        self.load_task()
+
         # Enable Menubar
         self.main_ui.todo_list.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         # Generated Menubar
         self.main_ui.todo_list.customContextMenuRequested.connect(self.generate_menu)
         # Enable double clicked event -> edit item
         self.main_ui.todo_list.viewport().installEventFilter(self)
+
+    def load_task(self):
+        self.todo_data = []
+        date = dt.datetime.now()
+
+        connect_db = sqlite3.connect(dir_local_db)
+        cur = connect_db.cursor()
+        cur.execute("SELECT * FROM todo_data WHERE TodoDate = :date",
+            {"date": date.date()}
+        )
+        rows = cur.fetchall()
+        cols = [column[0] for column in cur.description]
+        todo_data = pd.DataFrame.from_records(data=rows, columns=cols).to_numpy()
+        connect_db.close()
+
+        for _, data in enumerate(todo_data):
+            self.todo_data.append(
+                {"id": data[0],
+                 "todo": data[1]                
+                }
+            )
+            _todo_item = QListWidgetItem(data[1])
+            done = lambda x: Qt.Checked if x == 'TRUE' else Qt.Unchecked
+            _todo_item.setCheckState(done(data[3]))
+            self.main_ui.todo_list.addItem(_todo_item)
+
 
     def eventFilter(self, source:QObject, event:QEvent):    
         if(
@@ -72,6 +102,9 @@ class MyWindow(QMainWindow):
         else:
             text, ok = QInputDialog.getText(self, 'ToDo', f'Edit ToDo: {todo_item.text()}')
             if ok:
+                _todo_id = db_find_todo_id(self.todo_data, todo_item.text())
+                db_update_todo(_todo_id, text)
+                update_todo_list(self.todo_data, _todo_id, text)
                 todo_item.setText(text)
 
     def generate_menu(self, pos):
@@ -90,11 +123,29 @@ class MyWindow(QMainWindow):
             _todo_item = QListWidgetItem(text)
             _todo_item.setCheckState(Qt.Unchecked)
             self.main_ui.todo_list.addItem(_todo_item)
+            self.todo_date = dt.datetime.now()
+            _todo_db_id = db_insert_todo(text, self.todo_date.date())
+            self.todo_data.append({'id': _todo_db_id, 'todo': text})
 
     def delete_item(self, pos):
         del_item_row = self.main_ui.todo_list.indexAt(pos).row()
         del_item = self.main_ui.todo_list.takeItem(del_item_row)
+        _todo = del_item.text()
         self.main_ui.todo_list.removeItemWidget(del_item)
+
+        _todo_id = db_find_todo_id(self.todo_data, _todo)
+        db_delete_todo(_todo_id)
+
+    def todo_is_done(self):
+        '''
+        if todo is done than update todo db
+        '''
+        for i in range(self.main_ui.todo_list.count()):
+            item = self.main_ui.todo_list.item(i)            
+            if item.checkState() == Qt.Checked:
+                todo = item.text()
+                todo_id = db_find_todo_id(self.todo_data, todo)
+                db_is_done_todo(todo_id, 'TRUE')        
 
     def set_time_goal(self):
         _time, ok = QInputDialog.getInt(self, 'Time Goal', 'Set Time Goal(h)')
@@ -169,6 +220,9 @@ class MyWindow(QMainWindow):
         db_insert_work_end_time(self.db_id, _memo, _work_end_time_date, _delta_time)
         self.main_ui.work_memo.clear()
         self.main_ui.work_memo.setReadOnly(True)
+
+        # save finished task -> database
+        self.todo_is_done()
 
         # alter massage
         QMessageBox.about(self, "WORK TIME", f"Work time : {str(self.hour_time).rjust(2,'0')}:{str(self.min_time).rjust(2,'0')}")

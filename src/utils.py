@@ -1,7 +1,11 @@
 import datetime
 import sqlite3
- 
-def what_day_is_today():
+
+
+dir_local_db = "db/test.db"
+
+
+def what_day_is_today()  -> str:
     now = datetime.datetime.now()
     t = ['Monday', 'Tuseday', 'Wednseday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
     r = datetime.datetime.today().weekday()
@@ -35,7 +39,7 @@ def sub_time(start_time, end_time) -> float:
 
 
 def db_insert_work_start_time(goal_time, work_star_time) -> int:
-    connect_db = sqlite3.connect("db/test.db")
+    connect_db = sqlite3.connect(dir_local_db)
     
     cur = connect_db.cursor()
 
@@ -53,7 +57,7 @@ def db_insert_work_start_time(goal_time, work_star_time) -> int:
     return id
 
 def db_insert_work_end_time(id, memo, work_end_time, duration_time) -> None:
-    connect_db = sqlite3.connect("db/test.db")
+    connect_db = sqlite3.connect(dir_local_db)
     
     cur = connect_db.cursor()
 
@@ -74,6 +78,73 @@ def db_insert_work_end_time(id, memo, work_end_time, duration_time) -> None:
 
     connect_db.commit()
     connect_db.close()
+
+def db_insert_todo(todo, todo_date) -> int:
+    connect_db = sqlite3.connect(dir_local_db)
+    
+    cur = connect_db.cursor()
+
+    cur.executemany(
+        "INSERT INTO todo_data(Todo, TodoDate, isDone) VALUES (?, ?, ?)",
+        [(todo, todo_date, 'FALSE')]
+    )
+
+    cur.execute('SELECT id from todo_data ORDER BY ROWID DESC LIMIT 1') # 가장 나중에 추가한 row data의 id 추출
+    id = cur.fetchall()[0][0] # 작업한 데이터 unique id
+
+    connect_db.commit()
+    connect_db.close()
+
+    return id
+
+def db_update_todo(id, todo) -> None:
+    connect_db = sqlite3.connect(dir_local_db)
+    
+    cur = connect_db.cursor()
+
+    cur.execute(
+        "update todo_data set Todo = :todo WHERE id = :id",
+        {"todo": todo, "id": id}
+    )
+
+    connect_db.commit()
+    connect_db.close()
+
+def db_delete_todo(id) -> None:
+    connect_db = sqlite3.connect(dir_local_db)
+    
+    cur = connect_db.cursor()
+
+    cur.execute(
+        "delete from todo_data WHERE id = :id",
+        {"id": id}
+    )
+
+    connect_db.commit()
+    connect_db.close()
+
+def db_is_done_todo(id, done) -> None:
+    connect_db = sqlite3.connect(dir_local_db)
+    
+    cur = connect_db.cursor()
+
+    cur.execute(
+        "update todo_data set isDone = :done WHERE id = :id",
+        {"done": done, "id": id}
+    )
+
+    connect_db.commit()
+    connect_db.close()
+
+def db_find_todo_id(todo_data, todo) -> int:
+    for _, data in enumerate(todo_data):
+        if data['todo'] == todo:
+            return data['id']            
+
+def update_todo_list(todo_data, id, updated_todo) -> None:
+    for i, data in enumerate(todo_data):
+        if data['id'] == id:
+            todo_data[i]['todo'] = updated_todo
 
 if __name__ == "__main__":
     day = what_day_is_today()
