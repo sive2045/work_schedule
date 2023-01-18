@@ -1,5 +1,6 @@
-import datetime
+import datetime 
 import sqlite3
+import pandas as pd
 
 
 dir_local_db = "db/test.db"
@@ -37,15 +38,41 @@ def sub_time(start_time, end_time) -> float:
     time_duration = (end_hour - start_hour) + (end_min - start_min) / 60 + (end_sec - start_sec) / 60*60
     return '{:.2f}'.format(time_duration)
 
+def db_load_today_work_time() -> int:
+    '''
+    work date에 해당하는 work data db 불러와 
+    해당 총 일시간 (min) 및 목표 시간 (h) 반환
+    '''
+    date = datetime.datetime.now()
 
-def db_insert_work_start_time(goal_time, work_star_time) -> int:
+    connect_db = sqlite3.connect(dir_local_db)
+    cur = connect_db.cursor()
+    cur.execute("SELECT * FROM work_time_data WHERE WorkDate = :date",
+        {"date": date.date()}
+    )
+    rows = cur.fetchall()
+    cols = [column[0] for column in cur.description]
+    todo_data = pd.DataFrame.from_records(data=rows, columns=cols).to_numpy()
+    connect_db.close()
+    
+    if todo_data is None:
+        return (-1, -1)
+    else:
+        work_time_data = 0 # min
+        for _, data in enumerate(todo_data):
+            _data = data[-1].split(':')
+            work_time_data += int(_data[0])*60 + int(_data[1]) + int(_data[2])/60
+        goal_time = todo_data[-1][2]
+        return work_time_data, goal_time
+
+def db_insert_work_start_time(goal_time, work_date, work_star_time) -> int:
     connect_db = sqlite3.connect(dir_local_db)
     
     cur = connect_db.cursor()
 
     cur.executemany(
-        "INSERT INTO work_time_data(GoalTime, StartTime) VALUES (?, ?)",
-        [(goal_time, work_star_time)]
+        "INSERT INTO work_time_data(GoalTime, WorkDate, StartTime) VALUES (?, ?, ?)",
+        [(goal_time, work_date, work_star_time)]
     )
 
     cur.execute('SELECT id from work_time_data ORDER BY ROWID DESC LIMIT 1') # 가장 나중에 추가한 row data의 id 추출
@@ -56,7 +83,7 @@ def db_insert_work_start_time(goal_time, work_star_time) -> int:
 
     return id
 
-def db_insert_work_end_time(id, memo, work_end_time, duration_time) -> None:
+def db_insert_work_end_time(id, memo, goal_time, work_end_time, duration_time) -> None:
     connect_db = sqlite3.connect(dir_local_db)
     
     cur = connect_db.cursor()
@@ -64,6 +91,11 @@ def db_insert_work_end_time(id, memo, work_end_time, duration_time) -> None:
     cur.execute(
         "update work_time_data set EndTime = :end_time WHERE id = :id",
         {"end_time": work_end_time, "id": id}
+    )
+
+    cur.execute(
+        "update work_time_data set GoalTime = :goal_time WHERE id = :id",
+        {"goal_time": goal_time, "id": id}
     )
 
     cur.execute(
