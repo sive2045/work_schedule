@@ -55,7 +55,7 @@ def db_load_today_work_time() -> int:
     todo_data = pd.DataFrame.from_records(data=rows, columns=cols).to_numpy()
     connect_db.close()
     
-    if todo_data is None:
+    if todo_data.size == 0:
         return (-1, -1)
     else:
         work_time_data = 0 # min

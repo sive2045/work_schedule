@@ -79,7 +79,7 @@ class MyWindow(QMainWindow):
         cols = [column[0] for column in cur.description]
         todo_data = pd.DataFrame.from_records(data=rows, columns=cols).to_numpy()
         connect_db.close()
-        if todo_data is None:
+        if todo_data.size == 0:
             return
         else:            
             for _, data in enumerate(todo_data):
